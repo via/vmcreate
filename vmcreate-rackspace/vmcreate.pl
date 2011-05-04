@@ -132,8 +132,8 @@ sub create_vm {
    my $host_view = Vim::find_entity_view(view_type => 'HostSystem',
                                 filter => {'name' => $args{vmhost}});
    if (!$host_view) {
-       Util::trace(0, "\nError creating VM '$args{vmname}': "
-                    . "Host '$args{vmhost}' not found\n");
+       die "\nError creating VM $args{vmname}: "
+                    . "Host '$args{vmhost}' not found\n";
        return;
    }
 
@@ -143,13 +143,13 @@ sub create_vm {
 
    if ($ds_info{mor} eq 0) {
       if ($ds_info{name} eq 'datastore_error') {
-         Util::trace(0, "\nError creating VM '$args{vmname}': "
-                      . "Datastore $args{datastore} not available.\n");
+         die "\nError creating VM '$args{vmname}': "
+                      . "Datastore $args{datastore} not available.\n";
          return;
       }
       if ($ds_info{name} eq 'disksize_error') {
-         Util::trace(0, "\nError creating VM '$args{vmname}': The free space "
-                      . "available is less than the specified disksize.\n");
+         die "\nError creating VM '$args{vmname}': The free space "
+                      . "available is less than the specified disksize.\n";
          return;
       }
    }
@@ -166,8 +166,8 @@ sub create_vm {
    if($net_settings{'error'} eq 0) {
       push(@vm_devices, $net_settings{'network_conf'});
    } elsif ($net_settings{'error'} eq 1) {
-      Util::trace(0, "\nError creating VM '$args{vmname}': "
-                    . "Network '$args{nic_network}' not found\n");
+      die "\nError creating VM '$args{vmname}': "
+                    . "Network '$args{nic_network}' not found\n";
       return;
    }
 
@@ -191,14 +191,14 @@ sub create_vm {
                                 filter => { name => $args{datacenter}});
 
    unless (@$datacenter_views) {
-      Util::trace(0, "\nError creating VM '$args{vmname}': "
-                   . "Datacenter '$args{datacenter}' not found\n");
+      die "\nError creating VM '$args{vmname}': "
+                   . "Datacenter '$args{datacenter}' not found\n";
       return;
    }
 
    if ($#{$datacenter_views} != 0) {
-      Util::trace(0, "\nError creating VM '$args{vmname}': "
-                   . "Datacenter '$args{datacenter}' not unique\n");
+      die "\nError creating VM '$args{vmname}': "
+                   . "Datacenter '$args{datacenter}' not unique\n";
       return;
    }
    my $datacenter = shift @$datacenter_views;
@@ -212,36 +212,36 @@ sub create_vm {
                              pool => $comp_res_view->resourcePool);
     };
     if ($@) {
-       Util::trace(0, "\nError creating VM '$args{vmname}': ");
+       die "\nError creating VM '$args{vmname}': ";
        if (ref($@) eq 'SoapFault') {
           if (ref($@->detail) eq 'PlatformConfigFault') {
-             Util::trace(0, "Invalid VM configuration: "
-                            . ${$@->detail}{'text'} . "\n");
+             die "Invalid VM configuration: "
+                            . ${$@->detail}{'text'} . "\n";
           }
           elsif (ref($@->detail) eq 'InvalidDeviceSpec') {
-             Util::trace(0, "Invalid Device configuration: "
-                            . ${$@->detail}{'property'} . "\n");
+             die "Invalid Device configuration: "
+                            . ${$@->detail}{'property'} . "\n";
           }
            elsif (ref($@->detail) eq 'DatacenterMismatch') {
-             Util::trace(0, "DatacenterMismatch, the input arguments had entities "
-                          . "that did not belong to the same datacenter\n");
+             die "DatacenterMismatch, the input arguments had entities "
+                          . "that did not belong to the same datacenter\n";
           }
            elsif (ref($@->detail) eq 'HostNotConnected') {
-             Util::trace(0, "Unable to communicate with the remote host,"
-                         . " since it is disconnected\n");
+             die "Unable to communicate with the remote host,"
+                         . " since it is disconnected\n";
           }
           elsif (ref($@->detail) eq 'InvalidState') {
-             Util::trace(0, "The operation is not allowed in the current state\n");
+             die "The operation is not allowed in the current state\n";
           }
           elsif (ref($@->detail) eq 'DuplicateName') {
-             Util::trace(0, "Virtual machine already exists.\n");
+             die "Virtual machine already exists.\n";
           }
           else {
-             Util::trace(0, "\n" . $@ . "\n");
+             die "\n" . $@ . "\n";
           }
        }
        else {
-          Util::trace(0, "\n" . $@ . "\n");
+          die "\n" . $@ . "\n";
        }
    }
 }
