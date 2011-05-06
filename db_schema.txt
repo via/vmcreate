@@ -1,0 +1,53 @@
+
+
+
+GET /host/44454C4C-5200-1054-8046-B3C04F4A4631
+
+{
+        "_attachments" : [
+                "dmidecode.txt",
+                
+        ],
+        "name" : "store200a.mail.ord1t",
+        "domain" : "rsapps.net",
+        "nics" : {
+                "00:1e:4f:fa:e5:fc" : {
+                            "ipv4" : "10.1.2.3",
+                            "ipv6" : "::5",
+                            "network" : "super-cool-net",
+
+                            "vlans" : {
+                                "other-net" : {
+                                        "ipv4" : "10.7.6.3",
+                                },
+                            },              
+                },
+                "3e:c9:aa:cf:82:6f" : {},
+        },
+        "boot" : {"method" : "disk"},
+        "boot" : {
+                "method" : "kickstart"
+                "url" : "http://path.to.kickstart",
+                "repo" : "http://path.to.distro", 
+        },
+        "roles" : ["webserver", "edgedevice"],
+        
+        "vmware" : {
+                "hypervisor" : "lolhypercrap",
+                "cpus" : 4,
+                "memory" : 384,
+                "disk" : 16,
+        },
+}
+
+GET /network/super-cool-net
+
+{
+        "gateways" : ["1.2.3.4", "5.6.7.8"],
+        "nameservers" : ["4.2.2.1", "8.8.8.8"],
+        "routes" : ??dontcare??,
+        "nextserver" : "1.2.3.4" (defaults to dhcp server),
+}
+        
+        
+
