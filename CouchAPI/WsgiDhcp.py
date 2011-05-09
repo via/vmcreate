@@ -8,11 +8,11 @@ class WsgiDhcp:
     pass
 
   def __call__(self, env, start_response):
-    mac = escape(env['PATH_INFO'][1:])
-    if (re.match("([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}", mac)):
-      mac = "matches!"
-    status = '200 OK'
-    
-    start_response(status, [('Content-Type', 'text/plain')])
+    mac = escape(env['PATH_INFO'][1:]).upper()
+    if (not re.match("([0-9A-F]{2}:){5}[0-9A-F]{2}", mac)):
+      start_response('400 Invalid MAC Address', [('Content-Type', 'text/plain')])
+      return ["Invalid MAC"]
 
+    
+    start_response('200 OK', [('Content-Type', 'text/plain')])
     return [mac]
