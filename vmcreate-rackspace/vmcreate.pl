@@ -3,6 +3,9 @@
 # Copyright (c) 2007 VMware, Inc.  All rights reserved.
 #
 
+package Automation::VMCreate;
+our @EXPORT = qw(createVM);
+
 use strict;
 use warnings;
 
@@ -73,17 +76,11 @@ Opts::parse();
 Opts::validate();
 
 Util::connect();
-create_vms2();
+create_vm_from_opts();
 Util::disconnect();
 
-
-# This subroutine parses the input xml file to retrieve all the
-# parameters specified in the file and passes these parameters
-# to create_vm subroutine to create a single virtual machine
-# =============================================================
-
-sub create_vms2 {
-
+sub create_vm_from_opts() {
+  
   my $memory = Opts::get_option('memory');
   my $vmname = Opts::get_option('vmname');
   my $guestos = Opts::get_option('guestos');
@@ -92,8 +89,25 @@ sub create_vms2 {
   my $disksize = Opts::get_option('disksize');
   my $numprocs = Opts::get_option('numprocs');
   my $netname = Opts::get_option('network');
-  my $nic_poweron = 1;
   my $host = Opts::get_option('host');
+
+  createVM($vmname, $memory, $guestos, $datacenter, $datastore,
+    $disksize, $numprocs, $netname, $host);
+
+}
+
+
+# This subroutine parses the input xml file to retrieve all the
+# parameters specified in the file and passes these parameters
+# to create_vm subroutine to create a single virtual machine
+# =============================================================
+
+sub createVM {
+
+
+  my ($vmname, $memory, $guestos, $datacenter, $datastore,
+    $disksize, $numprocs, $netname, $host) = @_;
+  my $nic_poweron = 1; 
 
   create_vm(vmname => $vmname,
     vmhost => $host,
@@ -120,6 +134,8 @@ sub create_vms2 {
   print "VMNAME=\"" . $vmname . "\"\n";
   print "VMUUID=\"" . @$views[0]->config->uuid . "\"\n";
   print "VMMAC=\"" . $mac . "\"\n";
+
+  return ($vmname, @$views[0]->config->uuid, $mac);
 
 }
 
