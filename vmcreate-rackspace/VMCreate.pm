@@ -240,16 +240,26 @@ sub get_network {
       foreach (@$network_list) {
          if($network_name eq $_->name) {
             $network = $_;
-            my $nic_backing_info =
-               VirtualEthernetCardNetworkBackingInfo->new(deviceName => $network_name,
-                                                          network => $network);
 
+            my $dvs = Vim::get_view(mo_ref =>
+              $network->config->distributedVirtualSwitch);
+
+            my $vds_connection = 
+                DistributedVirtualSwitchPortConnection->new(
+                  portgroupKey => $network->config->key,
+                  switchUuid => $dvs->uuid);
+
+            my $nic_vds_backing_info = 
+               VirtualEthernetCardDistributedVirtualPortBackingInfo->new(
+                  port => $vds_connection);
+
+                                              
             my $vd_connect_info =
                VirtualDeviceConnectInfo->new(allowGuestControl => 1,
                                              connected => 0,
                                              startConnected => $poweron);
 
-            my $nic = VirtualPCNet32->new(backing => $nic_backing_info,
+            my $nic = VirtualPCNet32->new(backing => $nic_vds_backing_info,
                                           key => 0,
                                           unitNumber => $unit_num,
                                           addressType => 'generated',
