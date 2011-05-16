@@ -7,7 +7,11 @@
 print "Configuring $hostname ($mac) with $ip4\n";
 print "First boot will use kickstart file $ksfile\n";
 
-dhcpAddEntry($dhcpdconf, $hostname, $mac, $ip4);
+if (dhcpIpExists($dhcpdconf, $hostname, $ip4) == 0) {
+  dhcpAddEntry($dhcpdconf, $hostname, $mac, $ip4);
+} else {
+  die "IP already exists in dhcpd configuration!";
+}
 addPXEConfig($pxebase, $uuid, $ksfile);
 #updateDNS($zone, $hostname, $ip4, "");
 
@@ -31,8 +35,12 @@ sub dhcpIpExists() {
 
   open HANDLE, "<$configfile" or die "Unable to open dhcp configuration!\n";
   @configlines = <HANDLE>;
+  foreach (@configlines) {
+    if ($_ =~ m/$ip4/) {
+      return 1;
+    }
+  }
   close HANDLE;
-# TODO finish  
   return 0;
 }
 
@@ -48,6 +56,10 @@ sub dhcpAddEntry() {
   print HANDLE "}\n";
 
   close HANDLE;
+
+  system("/etc/init.d/dhcpd", "restart");
+
+
 }
 
 sub addPXEConfig() {
